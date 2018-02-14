@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Taut</title>
+	<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+		<div id="chat" class="chat"></div>
+		<form id="messageForm">
+			<label>Enter Message</label>
+			<textarea id="message"></textarea>
+			<br>
+			<input type="submit" value="send message">
+		</form>
+		<script>
+				var socket = io.connect();
+				var messageForm = document.getElementById('messageForm');
+				var message = document.getElementById('message');
+				var chat = document.getElementById('chat');
+
+				messageForm.onsubmit = function(e) {
+					e.preventDefault();
+					socket.emit('send message', message.value);
+					message.value = '';
+				};
+
+				socket.on('new message', function(data) {
+						var newMsg = document.createElement('p');
+						newMsg.innerHTML = data.msg;
+						chat.appendChild(newMsg);
+				});
+		</script>
+</body>
+</html>
