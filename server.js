@@ -23,6 +23,10 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('send message', function(data) {
-		io.sockets.emit('new message', {msg: data});
+		io.to(data.src).emit('new message', {msg: data.msg});
+	});
+
+	socket.on('join', function(data) {
+		socket.join(data);
 	});
 });

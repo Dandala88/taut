@@ -3,32 +3,105 @@
 <head>
 	<title>Taut</title>
 	<script src="/socket.io/socket.io.js"></script>
+	<style>
+		#chatBar {
+			position: fixed;
+			bottom: 0;
+			width: 95%;
+			padding: 25px 0px 0px 25px;
+			border: 2px solid gray;
+		}
+		
+		#message{
+			width:90%;
+			height:100px;
+		}
+
+		#ifid {
+			margin-top:5px;
+			width: 75%;
+			height:750px;
+			float:left;
+		}	
+
+		#cifid {
+			margin-top:5px;
+			width: 24%;
+			height:750px;
+			float:left;
+		}
+		
+		#searchBar {
+			width: 100%;
+		}
+
+		#searchInput {
+			float: left;
+			width: 85%;
+		}
+
+		#searchLabel {
+			float:left;
+		}
+	
+		#searchButton {
+			float:left
+		}
+	</style>
 </head>
 <body>
-		<div id="chat" class="chat"></div>
-		<form id="messageForm">
-			<label>Enter Message</label>
-			<textarea id="message"></textarea>
-			<br>
-			<input type="submit" value="send message">
-		</form>
+		<div id="searchBar">
+			<form id=searchForm>
+				<label id="searchLabel">URL:</label>
+				<input type="text" id="searchInput">
+				<input type="submit" value="Join" id="searchButton">
+			</form>
+		</div>
+		<div id="browser">
+			<iframe src="" id="ifid"></iframe>
+		</div>
+		<div id="chat" class="chat">
+			<iframe id="cifid"></iframe>
+		</div>
+		<div id="chatBar">
+			<form id="messageForm">
+				<textarea id="message"></textarea>
+				<br>
+				<input type="submit" value="send message">
+			</form>
+		</div>
 		<script>
 				var socket = io.connect();
 				var messageForm = document.getElementById('messageForm');
 				var message = document.getElementById('message');
-				var chat = document.getElementById('chat');
+				var chat = document.getElementById('cifid');
+				var source = document.getElementById('ifid');
+				var search = document.getElementById('searchForm');
+				var chatFrame = "data:text/html;charset=utf-8,";
+
+				source.onload = function() {
+					console.log("Source: " + source.src);
+				}
+
+				search.onsubmit = function(e) {
+					e.preventDefault();
+					//socket.leave(source.src) this is pretty buggy need to disable join button until leave button is pressed
+					source.src = document.getElementById('searchInput').value;
+					socket.emit('join', source.src);
+				}
 
 				messageForm.onsubmit = function(e) {
 					e.preventDefault();
-					socket.emit('send message', message.value);
+					socket.emit('send message', {msg: message.value, src: source.src});
 					message.value = '';
 				};
 
 				socket.on('new message', function(data) {
-						var newMsg = document.createElement('p');
-						newMsg.innerHTML = data.msg;
-						chat.appendChild(newMsg);
+						chatFrame += escape(data.msg) + "<br>";
+						chat.src = chatFrame;
+						console.log(chatFrame);
 				});
+
 		</script>
 </body>
 </html>
